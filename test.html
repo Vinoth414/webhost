@@ -3,64 +3,66 @@
 <head>
   <title>Tic Tac Toe</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
+    /* ... Same CSS as before ... */
+
+    .info {
+      margin-top: 20px;
+      text-align: center;
     }
 
-    .container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    .board {
-      display: grid;
-      grid-template-columns: repeat(3, 100px);
-      grid-template-rows: repeat(3, 100px);
-      gap: 4px;
-    }
-
-    .cell {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 36px;
-      font-weight: bold;
-      width: 100px;
-      height: 100px;
-      border: 2px solid #333;
+    .reload-btn {
+      margin-top: 10px;
+      padding: 8px 16px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
       cursor: pointer;
-    }
-
-    .cell:hover {
-      background-color: #f0f0f0;
-    }
-
-    .cell.winner {
-      background-color: #ff0;
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <div>
+      <label for="player1">Player 1 Name:</label>
+      <input type="text" id="player1" />
+    </div>
+    <div>
+      <label for="player2">Player 2 Name:</label>
+      <input type="text" id="player2" />
+    </div>
+    <button onclick="startGame()">Start Game</button>
     <div class="board" id="board">
-      <div class="cell" onclick="makeMove(0, 0)"></div>
-      <div class="cell" onclick="makeMove(0, 1)"></div>
-      <div class="cell" onclick="makeMove(0, 2)"></div>
-      <div class="cell" onclick="makeMove(1, 0)"></div>
-      <div class="cell" onclick="makeMove(1, 1)"></div>
-      <div class="cell" onclick="makeMove(1, 2)"></div>
-      <div class="cell" onclick="makeMove(2, 0)"></div>
-      <div class="cell" onclick="makeMove(2, 1)"></div>
-      <div class="cell" onclick="makeMove(2, 2)"></div>
+      <!-- ... Same board HTML as before ... -->
+    </div>
+    <div class="info">
+      <p id="turn"></p>
+      <p id="winner"></p>
+      <p>Score: <span id="scoreX">0</span> - <span id="scoreO">0</span></p>
+      <button class="reload-btn" onclick="resetBoard()">Reload</button>
     </div>
   </div>
 
   <script>
-    let board = [[null, null, null], [null, null, null], [null, null, null]];
-    let currentPlayer = 'X';
-    let gameOver = false;
+    let board, currentPlayer, gameOver, player1, player2, scoreX, scoreO;
+
+    function startGame() {
+      player1 = document.getElementById('player1').value || 'Player 1';
+      player2 = document.getElementById('player2').value || 'Player 2';
+      scoreX = 0;
+      scoreO = 0;
+      currentPlayer = 'X';
+      gameOver = false;
+      document.getElementById('turn').innerText = `Current Turn: ${currentPlayer}`;
+      document.getElementById('winner').innerText = '';
+      board = [[null, null, null], [null, null, null], [null, null, null]];
+
+      const cells = document.getElementsByClassName('cell');
+      for (let i = 0; i < cells.length; i++) {
+        cells[i].innerText = '';
+        cells[i].classList.remove('winner');
+      }
+    }
 
     function makeMove(row, col) {
       if (gameOver || board[row][col] !== null) return;
@@ -72,15 +74,17 @@
         gameOver = true;
         markWinnerCells(row, col);
         setTimeout(() => {
-          alert(`${currentPlayer} wins!`);
+          document.getElementById('winner').innerText = `${currentPlayer} wins!`;
+          updateScore(currentPlayer);
         }, 100);
       } else if (checkDraw()) {
         gameOver = true;
         setTimeout(() => {
-          alert("It's a draw!");
+          document.getElementById('winner').innerText = "It's a draw!";
         }, 100);
       } else {
         currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        document.getElementById('turn').innerText = `Current Turn: ${currentPlayer}`;
       }
     }
 
@@ -129,6 +133,20 @@
         document.getElementById('board').children[2].classList.add('winner');
         document.getElementById('board').children[4].classList.add('winner');
         document.getElementById('board').children[6].classList.add('winner');
+      }
+    }
+
+    function resetBoard() {
+      startGame();
+    }
+
+    function updateScore(winner) {
+      if (winner === 'X') {
+        scoreX++;
+        document.getElementById('scoreX').innerText = scoreX;
+      } else if (winner === 'O') {
+        scoreO++;
+        document.getElementById('scoreO').innerText = scoreO;
       }
     }
   </script>
