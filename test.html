@@ -1,135 +1,160 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Tic Tac Toe</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snake Game</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-    }
-
-    .container {
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-    }
-
-    .board {
-      display: grid;
-      grid-template-columns: repeat(3, 100px);
-      grid-template-rows: repeat(3, 100px);
-      gap: 4px;
-    }
-
-    .cell {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 36px;
-      font-weight: bold;
-      width: 100px;
-      height: 100px;
-      border: 2px solid #333;
-      cursor: pointer;
-    }
-
-    .cell:hover {
+      margin: 0;
       background-color: #f0f0f0;
     }
 
-    .cell.winner {
-      background-color: #ff0;
+    .game-container {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      border: 2px solid #333;
+    }
+
+    .snake, .food {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+    }
+
+    .snake {
+      background-color: #333;
+    }
+
+    .food {
+      background-color: red;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="board" id="board">
-      <div class="cell" onclick="makeMove(0, 0)"></div>
-      <div class="cell" onclick="makeMove(0, 1)"></div>
-      <div class="cell" onclick="makeMove(0, 2)"></div>
-      <div class="cell" onclick="makeMove(1, 0)"></div>
-      <div class="cell" onclick="makeMove(1, 1)"></div>
-      <div class="cell" onclick="makeMove(1, 2)"></div>
-      <div class="cell" onclick="makeMove(2, 0)"></div>
-      <div class="cell" onclick="makeMove(2, 1)"></div>
-      <div class="cell" onclick="makeMove(2, 2)"></div>
-    </div>
+  <div class="game-container">
+    <div class="snake" id="snake"></div>
+    <div class="food" id="food"></div>
   </div>
-
   <script>
-    let board = [[null, null, null], [null, null, null], [null, null, null]];
-    let currentPlayer = 'X';
-    let gameOver = false;
+    const gameContainer = document.querySelector('.game-container');
+    const snakeElement = document.getElementById('snake');
+    const foodElement = document.getElementById('food');
 
-    function makeMove(row, col) {
-      if (gameOver || board[row][col] !== null) return;
+    let snake = [{ x: 10, y: 10 }];
+    let food = getRandomFoodPosition();
+    let direction = { x: 0, y: 0 };
+    let newSegments = 0;
+    let speed = 5;
+    let intervalTime = 1000 / speed;
+    let interval = setInterval(moveSnake, intervalTime);
 
-      board[row][col] = currentPlayer;
-      document.getElementById('board').children[row * 3 + col].innerText = currentPlayer;
+    document.addEventListener('keydown', changeDirection);
 
-      if (checkWinner(row, col)) {
-        gameOver = true;
-        markWinnerCells(row, col);
-        setTimeout(() => {
-          alert(`${currentPlayer} wins!`);
-        }, 100);
-      } else if (checkDraw()) {
-        gameOver = true;
-        setTimeout(() => {
-          alert("It's a draw!");
-        }, 100);
+    function moveSnake() {
+      const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+      snake.unshift(head);
+
+      if (snake[0].x === food.x && snake[0].y === food.y) {
+        newSegments += 1;
+        updateFood();
+      }
+
+      if (newSegments === 0) {
+        snake.pop();
       } else {
-        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        newSegments -= 1;
       }
+
+      updateSnake();
+      checkCollision();
     }
 
-    function checkWinner(row, col) {
-      return checkRow(row) || checkColumn(col) || checkDiagonals(row, col);
+    function updateSnake() {
+      snakeElement.innerHTML = '';
+      snake.forEach(segment => {
+        const segmentElement = document.createElement('div');
+        segmentElement.style.gridRowStart = segment.y;
+        segmentElement.style.gridColumnStart = segment.x;
+        segmentElement.classList.add('snake');
+        snakeElement.appendChild(segmentElement);
+      });
     }
 
-    function checkRow(row) {
-      return board[row][0] === currentPlayer && board[row][1] === currentPlayer && board[row][2] === currentPlayer;
-    }
+    function changeDirection(event) {
+      const arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+      const keyPressed = event.key;
 
-    function checkColumn(col) {
-      return board[0][col] === currentPlayer && board[1][col] === currentPlayer && board[2][col] === currentPlayer;
-    }
+      if (arrowKeys.includes(keyPressed)) {
+        event.preventDefault();
 
-    function checkDiagonals(row, col) {
-      if (row === col) {
-        return board[0][0] === currentPlayer && board[1][1] === currentPlayer && board[2][2] === currentPlayer;
-      } else if (row + col === 2) {
-        return board[0][2] === currentPlayer && board[1][1] === currentPlayer && board[2][0] === currentPlayer;
-      }
-      return false;
-    }
-
-    function checkDraw() {
-      for (let row = 0; row < 3; row++) {
-        for (let col = 0; col < 3; col++) {
-          if (board[row][col] === null) {
-            return false;
-          }
+        switch (keyPressed) {
+          case 'ArrowUp':
+            if (direction.y !== 1) {
+              direction = { x: 0, y: -1 };
+            }
+            break;
+          case 'ArrowDown':
+            if (direction.y !== -1) {
+              direction = { x: 0, y: 1 };
+            }
+            break;
+          case 'ArrowLeft':
+            if (direction.x !== 1) {
+              direction = { x: -1, y: 0 };
+            }
+            break;
+          case 'ArrowRight':
+            if (direction.x !== -1) {
+              direction = { x: 1, y: 0 };
+            }
+            break;
         }
       }
-      return true;
     }
 
-    function markWinnerCells(row, col) {
-      document.getElementById('board').children[row * 3 + col].classList.add('winner');
+    function updateFood() {
+      food = getRandomFoodPosition();
+      const foodElement = document.getElementById('food');
+      foodElement.style.gridRowStart = food.y;
+      foodElement.style.gridColumnStart = food.x;
+    }
 
-      if (row === col) {
-        document.getElementById('board').children[0].classList.add('winner');
-        document.getElementById('board').children[4].classList.add('winner');
-        document.getElementById('board').children[8].classList.add('winner');
+    function getRandomFoodPosition() {
+      return {
+        x: Math.floor(Math.random() * 20) + 1,
+        y: Math.floor(Math.random() * 20) + 1
+      };
+    }
+
+    function checkCollision() {
+      if (snake[0].x < 1 || snake[0].x > 20 || snake[0].y < 1 || snake[0].y > 20) {
+        clearInterval(interval);
+        alert('Game Over! Press OK to restart.');
+        resetGame();
       }
 
-      if (row + col === 2) {
-        document.getElementById('board').children[2].classList.add('winner');
-        document.getElementById('board').children[4].classList.add('winner');
-        document.getElementById('board').children[6].classList.add('winner');
+      for (let i = 1; i < snake.length; i++) {
+        if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) {
+          clearInterval(interval);
+          alert('Game Over! Press OK to restart.');
+          resetGame();
+        }
       }
+    }
+
+    function resetGame() {
+      snake = [{ x: 10, y: 10 }];
+      direction = { x: 0, y: 0 };
+      newSegments = 0;
+      food = getRandomFoodPosition();
+      intervalTime = 1000 / speed;
+      interval = setInterval(moveSnake, intervalTime);
     }
   </script>
 </body>
