@@ -15,6 +15,10 @@
     <label for="yAxisColumn">Choose Y-axis Column:</label>
     <select id="yAxisColumn" onchange="updateChart()"></select>
   </div>
+  <div>
+    <label for="chartColor">Choose Chart Color:</label>
+    <input type="color" id="chartColor" onchange="updateChart()" value="#3366cc">
+  </div>
   <div id="chartContainer"></div>
   <div id="output"></div>
 
@@ -27,6 +31,7 @@
     let excelData = [];
     let selectedXAxis = '';
     let selectedYAxis = '';
+    let selectedChartColor = '#3366cc';
 
     // Function to process the uploaded Excel file
     function processExcelFile(file) {
@@ -107,7 +112,8 @@
       var options = {
         title: `Excel Data Bar Chart (${xAxisColumn} vs ${yAxisColumn})`,
         width: 800,
-        height: 400
+        height: 400,
+        colors: [selectedChartColor]
       };
 
       var chart = new google.visualization.ColumnChart(document.getElementById('chartContainer'));
@@ -129,8 +135,12 @@
     function updateChart() {
       const xAxisSelector = document.getElementById('xAxisColumn');
       const yAxisSelector = document.getElementById('yAxisColumn');
+      const chartColorPicker = document.getElementById('chartColor');
+
       selectedXAxis = xAxisSelector.value;
       selectedYAxis = yAxisSelector.value;
+      selectedChartColor = chartColorPicker.value;
+
       drawChart(selectedXAxis, selectedYAxis);
     }
 
