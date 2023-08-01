@@ -28,6 +28,11 @@
       <option value="PieChart">Pie Chart</option>
       <option value="AreaChart">Area Chart</option>
       <option value="ScatterChart">Scatter Chart</option>
+      <option value="ColumnChart">Column Chart</option>
+      <option value="ComboChart">Combo Chart</option>
+      <option value="Histogram">Histogram</option>
+      <option value="BubbleChart">Bubble Chart</option>
+      <option value="CandlestickChart">Candlestick Chart</option>
     </select>
   </div>
   <div id="chartContainer"></div>
@@ -146,6 +151,21 @@
           break;
         case 'ScatterChart':
           chart = new google.visualization.ScatterChart(document.getElementById('chartContainer'));
+          break;
+        case 'ColumnChart':
+          chart = new google.visualization.ColumnChart(document.getElementById('chartContainer'));
+          break;
+        case 'ComboChart':
+          chart = new google.visualization.ComboChart(document.getElementById('chartContainer'));
+          break;
+        case 'Histogram':
+          chart = new google.visualization.Histogram(document.getElementById('chartContainer'));
+          break;
+        case 'BubbleChart':
+          chart = new google.visualization.BubbleChart(document.getElementById('chartContainer'));
+          break;
+        case 'CandlestickChart':
+          chart = new google.visualization.CandlestickChart(document.getElementById('chartContainer'));
           break;
         default:
           chart = new google.visualization.BarChart(document.getElementById('chartContainer'));
