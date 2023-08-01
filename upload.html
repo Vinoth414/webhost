@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Excel Processing and Google Bar Chart Example</title>
+  <title>Excel Processing and Google Charts Example</title>
 </head>
 <body>
   <h1>Upload and Process Excel File</h1>
@@ -18,6 +18,11 @@
   <div>
     <label for="chartColor">Choose Chart Color:</label>
     <input type="color" id="chartColor" onchange="updateChart()" value="#3366cc">
+    <button onclick="removeSelectedColor()">Remove Selected Color</button>
+  </div>
+  <div>
+    <label for="chartType">Choose Chart Type:</label>
+    <select id="chartType" onchange="updateChart()"></select>
   </div>
   <div id="chartContainer"></div>
   <div id="output"></div>
@@ -31,7 +36,10 @@
     let excelData = [];
     let selectedXAxis = '';
     let selectedYAxis = '';
+    let chartData = [];
     let selectedChartColor = '#3366cc';
+    let chartType = 'ColumnChart';
+    let chartIndex = 0;
 
     // Function to process the uploaded Excel file
     function processExcelFile(file) {
@@ -79,11 +87,11 @@
         yAxisSelector.value = selectedYAxis;
 
         // Draw the initial chart
-        drawChart(selectedXAxis, selectedYAxis);
+        drawChart(selectedXAxis, selectedYAxis, selectedChartColor);
       }
     }
 
-    // Function to display the Google Bar Chart and data table
+    // Function to display the Google Chart and data table
     function displayData(data) {
       const outputDiv = document.getElementById('output');
       let html = '<table>';
@@ -100,23 +108,38 @@
       updateChart();
     }
 
-    // Function to draw the Google Bar Chart
-    function drawChart(xAxisColumn, yAxisColumn) {
-      const chartData = [['Column', yAxisColumn]];
+    // Function to draw the Google Chart
+    function drawChart(xAxisColumn, yAxisColumn, color) {
+      chartData[chartIndex] = [['Column', yAxisColumn]];
       excelData.forEach((row) => {
-        chartData.push([row[xAxisColumn], parseFloat(row[yAxisColumn])]);
+        chartData[chartIndex].push([row[xAxisColumn], parseFloat(row[yAxisColumn])]);
       });
 
-      var data = google.visualization.arrayToDataTable(chartData);
+      var data = google.visualization.arrayToDataTable(chartData[chartIndex]);
 
       var options = {
-        title: `Excel Data Bar Chart (${xAxisColumn} vs ${yAxisColumn})`,
+        title: `Excel Data ${chartType} ${chartIndex + 1} (${xAxisColumn} vs ${yAxisColumn})`,
         width: 800,
         height: 400,
-        colors: [selectedChartColor]
+        colors: [color]
       };
 
-      var chart = new google.visualization.ColumnChart(document.getElementById('chartContainer'));
+      var chart;
+      switch (chartType) {
+        case 'BarChart':
+          chart = new google.visualization.BarChart(document.getElementById('chartContainer'));
+          break;
+        case 'LineChart':
+          chart = new google.visualization.LineChart(document.getElementById('chartContainer'));
+          break;
+        case 'PieChart':
+          chart = new google.visualization.PieChart(document.getElementById('chartContainer'));
+          break;
+        default:
+          chart = new google.visualization.ColumnChart(document.getElementById('chartContainer'));
+          break;
+      }
+
       chart.draw(data, options);
     }
 
@@ -126,22 +149,32 @@
       const file = fileInput.files[0];
       if (file) {
         processExcelFile(file);
+        chartData = [];
+        chartIndex = 0;
       } else {
         alert('Please select a valid Excel file.');
       }
     }
 
-    // Function to update the chart when the user changes the selections
+    // Function to update the chart when the user changes the selections or color
     function updateChart() {
       const xAxisSelector = document.getElementById('xAxisColumn');
       const yAxisSelector = document.getElementById('yAxisColumn');
       const chartColorPicker = document.getElementById('chartColor');
+      const chartTypeSelector = document.getElementById('chartType');
 
       selectedXAxis = xAxisSelector.value;
       selectedYAxis = yAxisSelector.value;
       selectedChartColor = chartColorPicker.value;
+      chartType = chartTypeSelector.value;
 
-      drawChart(selectedXAxis, selectedYAxis);
+      drawChart(selectedXAxis, selectedYAxis, selectedChartColor);
+    }
+
+    // Function to remove the selected chart color
+    function removeSelectedColor() {
+      selectedChartColor = null;
+      drawChart(selectedXAxis, selectedYAxis, selectedChartColor);
     }
 
     // Trigger loading Google Charts library
