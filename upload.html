@@ -7,6 +7,14 @@
   <h1>Upload and Process Excel File</h1>
   <input type="file" id="fileInput" />
   <button onclick="processFile()">Process File</button>
+  <div>
+    <label for="xAxisColumn">Choose X-axis Column:</label>
+    <select id="xAxisColumn"></select>
+  </div>
+  <div>
+    <label for="yAxisColumn">Choose Y-axis Column:</label>
+    <select id="yAxisColumn"></select>
+  </div>
   <div id="chartContainer"></div>
   <div id="output"></div>
 
@@ -15,6 +23,8 @@
   <script>
     // Load Google Charts library
     google.charts.load('current', { 'packages': ['corechart'] });
+
+    let excelData = [];
 
     // Function to process the uploaded Excel file
     function processExcelFile(file) {
@@ -25,39 +35,75 @@
         const workbook = XLSX.read(data, { type: 'binary' });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const excelData = XLSX.utils.sheet_to_json(worksheet);
+        excelData = XLSX.utils.sheet_to_json(worksheet);
 
-        displayData(excelData);
+        populateColumnSelectors();
       };
 
       reader.readAsBinaryString(file);
+    }
+
+    // Function to populate the column selectors
+    function populateColumnSelectors() {
+      const xAxisSelector = document.getElementById('xAxisColumn');
+      const yAxisSelector = document.getElementById('yAxisColumn');
+      xAxisSelector.innerHTML = '';
+      yAxisSelector.innerHTML = '';
+
+      // Get the column names from the first row of the Excel data
+      if (excelData.length > 0) {
+        const columns = Object.keys(excelData[0]);
+        columns.forEach((column) => {
+          const option = document.createElement('option');
+          option.value = column;
+          option.textContent = column;
+          xAxisSelector.appendChild(option);
+
+          const yAxisOption = document.createElement('option');
+          yAxisOption.value = column;
+          yAxisOption.textContent = column;
+          yAxisSelector.appendChild(yAxisOption);
+        });
+
+        // Preselect the first two columns by default
+        xAxisSelector.selectedIndex = 0;
+        yAxisSelector.selectedIndex = 1;
+
+        // Draw the initial chart
+        drawChart(xAxisSelector.value, yAxisSelector.value);
+      }
     }
 
     // Function to display the Google Bar Chart and data table
     function displayData(data) {
       const outputDiv = document.getElementById('output');
       let html = '<table>';
-      let chartData = [['Column 1', 'Column 2']];
       data.forEach((row) => {
         html += '<tr>';
-        html += `<td>${row['Column 1']}</td>`;
-        html += `<td>${row['Column 2']}</td>`;
+        for (const key in row) {
+          html += `<td>${row[key]}</td>`;
+        }
         html += '</tr>';
-
-        chartData.push([row['Column 1'], parseFloat(row['Column 2'])]);
       });
       html += '</table>';
       outputDiv.innerHTML = html;
 
-      drawChart(chartData);
+      const xAxisSelector = document.getElementById('xAxisColumn');
+      const yAxisSelector = document.getElementById('yAxisColumn');
+      drawChart(xAxisSelector.value, yAxisSelector.value);
     }
 
     // Function to draw the Google Bar Chart
-    function drawChart(chartData) {
+    function drawChart(xAxisColumn, yAxisColumn) {
+      const chartData = [['Column', yAxisColumn]];
+      excelData.forEach((row) => {
+        chartData.push([row[xAxisColumn], parseFloat(row[yAxisColumn])]);
+      });
+
       var data = google.visualization.arrayToDataTable(chartData);
 
       var options = {
-        title: 'Excel Data Bar Chart',
+        title: `Excel Data Bar Chart (${xAxisColumn} vs ${yAxisColumn})`,
         width: 800,
         height: 400
       };
