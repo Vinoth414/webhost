@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Excel Processing Example</title>
+</head>
+<body>
+  <h1>Upload and Process Excel File</h1>
+  <input type="file" id="fileInput" />
+  <button onclick="processFile()">Process File</button>
+  <div id="output"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+  <script>
+    // Function to process the uploaded Excel file
+    function processExcelFile(file) {
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        const data = e.target.result;
+        const workbook = XLSX.read(data, { type: 'binary' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const excelData = XLSX.utils.sheet_to_json(worksheet);
+
+        displayData(excelData);
+      };
+
+      reader.readAsBinaryString(file);
+    }
+
+    // Function to display the processed data on the page
+    function displayData(data) {
+      const outputDiv = document.getElementById('output');
+      let html = '<table>';
+      data.forEach((row) => {
+        html += '<tr>';
+        Object.values(row).forEach((cell) => {
+          html += `<td>${cell}</td>`;
+        });
+        html += '</tr>';
+      });
+      html += '</table>';
+      outputDiv.innerHTML = html;
+    }
+
+    // Function to handle file upload and processing
+    function processFile() {
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+      if (file) {
+        processExcelFile(file);
+      } else {
+        alert('Please select a valid Excel file.');
+      }
+    }
+  </script>
+</body>
+</html>
