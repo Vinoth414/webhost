@@ -1,16 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Excel Processing Example</title>
+  <title>Excel Processing and Google Bar Chart Example</title>
 </head>
 <body>
   <h1>Upload and Process Excel File</h1>
   <input type="file" id="fileInput" />
   <button onclick="processFile()">Process File</button>
+  <div id="chartContainer"></div>
   <div id="output"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script>
+    // Load Google Charts library
+    google.charts.load('current', { 'packages': ['corechart'] });
+
     // Function to process the uploaded Excel file
     function processExcelFile(file) {
       const reader = new FileReader();
@@ -28,19 +33,37 @@
       reader.readAsBinaryString(file);
     }
 
-    // Function to display the processed data on the page
+    // Function to display the Google Bar Chart and data table
     function displayData(data) {
       const outputDiv = document.getElementById('output');
       let html = '<table>';
+      let chartData = [['Column 1', 'Column 2']];
       data.forEach((row) => {
         html += '<tr>';
-        Object.values(row).forEach((cell) => {
-          html += `<td>${cell}</td>`;
-        });
+        html += `<td>${row['Column 1']}</td>`;
+        html += `<td>${row['Column 2']}</td>`;
         html += '</tr>';
+
+        chartData.push([row['Column 1'], parseFloat(row['Column 2'])]);
       });
       html += '</table>';
       outputDiv.innerHTML = html;
+
+      drawChart(chartData);
+    }
+
+    // Function to draw the Google Bar Chart
+    function drawChart(chartData) {
+      var data = google.visualization.arrayToDataTable(chartData);
+
+      var options = {
+        title: 'Excel Data Bar Chart',
+        width: 800,
+        height: 400
+      };
+
+      var chart = new google.visualization.ColumnChart(document.getElementById('chartContainer'));
+      chart.draw(data, options);
     }
 
     // Function to handle file upload and processing
@@ -53,6 +76,11 @@
         alert('Please select a valid Excel file.');
       }
     }
+
+    // Trigger loading Google Charts library
+    google.charts.setOnLoadCallback(function () {
+      // Do nothing, just make sure Google Charts is loaded before using it
+    });
   </script>
 </body>
 </html>
