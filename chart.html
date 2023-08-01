@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Google Chart Example</title>
+  <!-- Load the Google Charts API -->
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+<body>
+  <div id="chart_div" style="width: 400px; height: 300px;"></div>
+
+  <script type="text/javascript">
+    // Load the Google Charts API and set up the callback function
+    google.charts.load('current', { 'packages': ['corechart'] });
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+      // Create the data table.
+      var data = new google.visualization.DataTable();
+      data.addColumn('string', 'Category');
+      data.addColumn('number', 'Value');
+      data.addRows([
+        ['Category 1', 5],
+        ['Category 2', 8],
+        ['Category 3', 2],
+        ['Category 4', 4],
+        ['Category 5', 6]
+      ]);
+
+      // Set chart options
+      var options = {
+        title: 'Sample Chart',
+        width: 400,
+        height: 300,
+        legend: { position: 'none' }
+      };
+
+      // Instantiate and draw the chart.
+      var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+      chart.draw(data, options);
+    }
+  </script>
+</body>
+</html>
