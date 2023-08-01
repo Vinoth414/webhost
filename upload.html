@@ -9,11 +9,11 @@
   <button onclick="processFile()">Process File</button>
   <div>
     <label for="xAxisColumn">Choose X-axis Column:</label>
-    <select id="xAxisColumn"></select>
+    <select id="xAxisColumn" onchange="updateChart()"></select>
   </div>
   <div>
     <label for="yAxisColumn">Choose Y-axis Column:</label>
-    <select id="yAxisColumn"></select>
+    <select id="yAxisColumn" onchange="updateChart()"></select>
   </div>
   <div id="chartContainer"></div>
   <div id="output"></div>
@@ -25,6 +25,8 @@
     google.charts.load('current', { 'packages': ['corechart'] });
 
     let excelData = [];
+    let selectedXAxis = '';
+    let selectedYAxis = '';
 
     // Function to process the uploaded Excel file
     function processExcelFile(file) {
@@ -66,11 +68,13 @@
         });
 
         // Preselect the first two columns by default
-        xAxisSelector.selectedIndex = 0;
-        yAxisSelector.selectedIndex = 1;
+        selectedXAxis = columns[0];
+        selectedYAxis = columns[1];
+        xAxisSelector.value = selectedXAxis;
+        yAxisSelector.value = selectedYAxis;
 
         // Draw the initial chart
-        drawChart(xAxisSelector.value, yAxisSelector.value);
+        drawChart(selectedXAxis, selectedYAxis);
       }
     }
 
@@ -88,9 +92,7 @@
       html += '</table>';
       outputDiv.innerHTML = html;
 
-      const xAxisSelector = document.getElementById('xAxisColumn');
-      const yAxisSelector = document.getElementById('yAxisColumn');
-      drawChart(xAxisSelector.value, yAxisSelector.value);
+      updateChart();
     }
 
     // Function to draw the Google Bar Chart
@@ -121,6 +123,15 @@
       } else {
         alert('Please select a valid Excel file.');
       }
+    }
+
+    // Function to update the chart when the user changes the selections
+    function updateChart() {
+      const xAxisSelector = document.getElementById('xAxisColumn');
+      const yAxisSelector = document.getElementById('yAxisColumn');
+      selectedXAxis = xAxisSelector.value;
+      selectedYAxis = yAxisSelector.value;
+      drawChart(selectedXAxis, selectedYAxis);
     }
 
     // Trigger loading Google Charts library
