@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Stock Trading Strategy</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    
+    h1 {
+      text-align: center;
+    }
+    
+    .chart-container {
+      margin-top: 20px;
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Stock Trading Strategy: Moving Average Crossover</h1>
+  <div class="chart-container">
+    <canvas id="stockChart"></canvas>
+  </div>
+  <script>
+    // Sample stock price data (replace this with real data from an API)
+    const stockPrices = [
+      { date: '2023-08-01', price: 100 },
+      { date: '2023-08-02', price: 105 },
+      { date: '2023-08-03', price: 110 },
+      { date: '2023-08-04', price: 108 },
+      { date: '2023-08-05', price: 115 },
+      // Add more data here...
+    ];
+    
+    // Moving average periods
+    const shortPeriod = 20;
+    const longPeriod = 50;
+    
+    // Calculate moving averages
+    function calculateMovingAverages(prices) {
+      const shortMA = [];
+      const longMA = [];
+    
+      for (let i = 0; i < prices.length; i++) {
+        if (i >= shortPeriod - 1) {
+          const shortSum = prices
+            .slice(i - shortPeriod + 1, i + 1)
+            .reduce((acc, p) => acc + p.price, 0);
+          shortMA.push(shortSum / shortPeriod);
+        }
+    
+        if (i >= longPeriod - 1) {
+          const longSum = prices
+            .slice(i - longPeriod + 1, i + 1)
+            .reduce((acc, p) => acc + p.price, 0);
+          longMA.push(longSum / longPeriod);
+        }
+      }
+    
+      return { shortMA, longMA };
+    }
+    
+    // Draw the chart with moving averages
+    function drawChart() {
+      const ctx = document.getElementById('stockChart').getContext('2d');
+      const movingAverages = calculateMovingAverages(stockPrices);
+    
+      const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: stockPrices.map((p) => p.date),
+          datasets: [
+            {
+              label: 'Stock Price',
+              data: stockPrices.map((p) => p.price),
+              borderColor: 'blue',
+              fill: false,
+            },
+            {
+              label: `${shortPeriod}-Day MA`,
+              data: movingAverages.shortMA,
+              borderColor: 'green',
+              fill: false,
+            },
+            {
+              label: `${longPeriod}-Day MA`,
+              data: movingAverages.longMA,
+              borderColor: 'orange',
+              fill: false,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+        },
+      });
+    }
+    
+    drawChart();
+  </script>
+</body>
+</html>
