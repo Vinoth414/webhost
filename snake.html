@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    .game-container {
+      width: 400px;
+      height: 400px;
+      border: 2px solid #000;
+      display: grid;
+      grid-template-columns: repeat(20, 1fr);
+    }
+    .cell {
+      width: 20px;
+      height: 20px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+    }
+    .snake {
+      background-color: green;
+    }
+    .food {
+      background-color: red;
+    }
+    .game-over {
+      font-size: 24px;
+      margin-top: 10px;
+      color: red;
+    }
+  </style>
+  <title>Snake Game</title>
+</head>
+<body>
+  <h1>Snake Game</h1>
+  <div class="game-container" id="game-container"></div>
+  <p class="game-over" id="game-over"></p>
+  <script>
+    const ROWS = 20;
+    const COLS = 20;
+    const CELL_SIZE = 20;
+
+    const gameContainer = document.getElementById('game-container');
+    const gameOverElement = document.getElementById('game-over');
+
+    let snake = [{ row: 5, col: 5 }];
+    let food = generateFood();
+    let direction = 'RIGHT';
+    let gameOver = false;
+
+    document.addEventListener('keydown', (e) => {
+      switch (e.key) {
+        case 'ArrowUp':
+          direction = 'UP';
+          break;
+        case 'ArrowDown':
+          direction = 'DOWN';
+          break;
+        case 'ArrowLeft':
+          direction = 'LEFT';
+          break;
+        case 'ArrowRight':
+          direction = 'RIGHT';
+          break;
+        default:
+          break;
+      }
+    });
+
+    function generateFood() {
+      const row = Math.floor(Math.random() * ROWS);
+      const col = Math.floor(Math.random() * COLS);
+      return { row, col };
+    }
+
+    function checkCollision(segments) {
+      const head = segments[0];
+      return segments.slice(1).some((segment) => segment.row === head.row && segment.col === head.col);
+    }
+
+    function updateGame() {
+      if (gameOver) return;
+
+      const newSnake = [...snake];
+      let newHead = { ...newSnake[0] };
+
+      switch (direction) {
+        case 'UP':
+          newHead.row -= 1;
+          break;
+        case 'DOWN':
+          newHead.row += 1;
+          break;
+        case 'LEFT':
+          newHead.col -= 1;
+          break;
+        case 'RIGHT':
+          newHead.col += 1;
+          break;
+        default:
+          break;
+      }
+
+      newSnake.unshift(newHead);
+
+      if (newHead.row === food.row && newHead.col === food.col) {
+        food = generateFood();
+      } else {
+        newSnake.pop();
+      }
+
+      if (
+        newHead.row < 0 ||
+        newHead.row >= ROWS ||
+        newHead.col < 0 ||
+        newHead.col >= COLS ||
+        checkCollision(newSnake)
+      ) {
+        gameOver = true;
+        gameOverElement.textContent = 'Game Over!';
+      } else {
+        snake = newSnake;
+      }
+
+      renderGame();
+    }
+
+    function renderGame() {
+      gameContainer.innerHTML = '';
+      for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+          if (snake.some(segment => segment.row === row && segment.col === col)) {
+            cell.classList.add('snake');
+          } else if (food.row === row && food.col === col) {
+            cell.classList.add('food');
+          }
+          gameContainer.appendChild(cell);
+        }
+      }
+    }
+
+    setInterval(updateGame, 100);
+  </script>
+</body>
+</html>
