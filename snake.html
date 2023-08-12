@@ -41,6 +41,16 @@
       margin-top: 10px;
       color: red;
     }
+    .try-again {
+      display: none;
+      margin-top: 10px;
+      padding: 5px 10px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
   </style>
   <title>Snake Game</title>
 </head>
@@ -48,18 +58,23 @@
   <h1>Snake Game</h1>
   <div class="game-container" id="game-container"></div>
   <p class="game-over" id="game-over"></p>
+  <button class="try-again" id="try-again">Try Again</button>
   <script>
     const ROWS = 20;
     const COLS = 20;
     const CELL_SIZE = 20;
+    const INITIAL_SPEED = 150;
+    const DECREASE_AMOUNT = 10;
 
     const gameContainer = document.getElementById('game-container');
     const gameOverElement = document.getElementById('game-over');
+    const tryAgainButton = document.getElementById('try-again');
 
     let snake = [{ row: 5, col: 5 }];
     let food = generateFood();
     let direction = 'RIGHT';
     let gameOver = false;
+    let speed = INITIAL_SPEED;
 
     document.addEventListener('keydown', (e) => {
       switch (e.key) {
@@ -80,6 +95,17 @@
       }
     });
 
+    tryAgainButton.addEventListener('click', () => {
+      snake = [{ row: 5, col: 5 }];
+      food = generateFood();
+      direction = 'RIGHT';
+      gameOver = false;
+      speed = INITIAL_SPEED;
+      gameOverElement.textContent = '';
+      tryAgainButton.style.display = 'none';
+      updateGame();
+    });
+
     function generateFood() {
       const row = Math.floor(Math.random() * ROWS);
       const col = Math.floor(Math.random() * COLS);
@@ -92,7 +118,10 @@
     }
 
     function updateGame() {
-      if (gameOver) return;
+      if (gameOver) {
+        tryAgainButton.style.display = 'block';
+        return;
+      }
 
       const newSnake = [...snake];
       let newHead = { ...newSnake[0] };
@@ -118,6 +147,7 @@
 
       if (newHead.row === food.row && newHead.col === food.col) {
         food = generateFood();
+        speed -= DECREASE_AMOUNT;
       } else {
         newSnake.pop();
       }
@@ -136,6 +166,7 @@
       }
 
       renderGame();
+      setTimeout(updateGame, speed);
     }
 
     function renderGame() {
@@ -154,7 +185,7 @@
       }
     }
 
-    setInterval(updateGame, 100);
+    updateGame();
   </script>
 </body>
 </html>
